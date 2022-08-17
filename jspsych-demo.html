@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="jspsych-6.2/jspsych.js"></script>
+    <script src="jspsych-6.2/plugins/jspsych-rdk.js"></script>
+    <script src="jspsych-angle-response.js"></script>
+    <link rel="stylesheet" href="jspsych-6.2/css/jspsych.css" />
+  </head>
+  <body></body>
+  <script>
+    /*
+
+    85% of trials: 35% coherent in any direction
+    15% of trials: 100% coherent in any direction
+
+    half of no-change trials: 500ms
+    other half: 1000ms
+
+    192 change
+    192 no change
+
+    24 catch trials
+    */
+
+    const timeline = [];
+
+    const trials = [
+      {coherence: 1, change: false, duration: 1000},
+      {coherence: 1, change: false, duration: 500},
+      {coherence: .35, change: true, duration: 1000},
+      {coherence: .35, change: true, duration: 1000},
+      {coherence: .35, change: true, duration: 1000},
+      {coherence: .35, change: true, duration: 1000},
+      {coherence: .35, change: false, duration: 500},
+      {coherence: .35, change: false, duration: 500},
+      {coherence: .35, change: false, duration: 1000},
+      {coherence: .35, change: false, duration: 1000},
+    ];
+
+    const rdk_trial = {
+      type: "rdk",
+      correct_choice: "NONE",
+      border: true,
+      border_thickness: 2,
+      background_color: "white",
+      aperture_width: 200,
+      aperture_height: 200,
+      dot_color: "black",
+      move_distance: 6,
+      coherence: jsPsych.timelineVariable('coherence'),
+      number_of_sets: 1,
+      number_of_dots: 200,
+      trial_duration: jsPsych.timelineVariable('duration'),
+      on_start: (trial) => {
+        const angle = Math.floor(Math.random()*360);
+        trial.coherent_direction = angle;
+        trial.data = {
+          coherent_direction: angle
+        }
+      }
+    }
+
+    const response_trial = {
+      type: "angle-response",
+      target_angle: () => {
+        return jsPsych.data.get().last(1).values()[0].coherent_direction
+      }
+    }
+
+    const rdk_procedure = {
+      timeline: [rdk_trial, response_trial],
+      timeline_variables: trials,
+      randomize_order: true
+    }
+
+    timeline.push(rdk_procedure);
+
+    jsPsych.init({
+      timeline: timeline
+    })
+  </script>
+</html>
